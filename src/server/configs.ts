@@ -7,5 +7,8 @@ export const configs: IConfigs = {
         username: "",
         password: "",
         collection: "mediascraper",
-    }
+    },
+    authusers: [
+        { username: "superuser", password: "superpassword" },
+    ],
 }

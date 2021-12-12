@@ -1,5 +1,6 @@
 export interface IConfigs {
     mongodb: IMongo,
+    authusers: IUser[],
 }
 
 interface IMongo {
@@ -8,4 +9,9 @@ interface IMongo {
     username: string,
     password: string,
     collection: string,
+}
+
+interface IUser {
+    username: string;
+    password: string;
 }

@@ -8,12 +8,11 @@ import {APIError, IError} from '../../domain/IError';
 router.route('/test')
     .get((req: Request, res: Response, next: NextFunction) => {
         const {username}: {username: string} = userInfo();
-        if (!username || username == "vuphan") {
-            const error = new APIError(403, "lala went wrong");
+        if (!username) {
             next(new APIError(403, "Unauthenticated"));
-        }
-        else
+        } else {
             res.json({username});
+        }
     })
     .post(async (req: Request, res: Response) => {
         const {text}: { text: string } = req.body;
