@@ -1,5 +1,5 @@
-import Test from "./test";
+import ScrapeData from "./scrapedata";
 
 export {
-    Test,
+    ScrapeData,
 }

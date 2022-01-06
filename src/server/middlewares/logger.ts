@@ -1,7 +1,6 @@
 import {Request, Response} from 'express';
 
 export default (req: Request, res: Response, next: (param?: unknown) => void): void => {
-    console.log("inlog");
     console.clear()
     const date: Date = new Date();
     console.table([{

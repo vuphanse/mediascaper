@@ -1,4 +1,3 @@
-import test from './routes/test';
-import extra from './routes/extra';
+import scrape from './routes/scrape';
 
-export default { extra, test };
+export default { scrape };
