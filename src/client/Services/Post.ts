@@ -1,7 +1,9 @@
+let base64 = require('base-64');
+
 export default async function Post(
     url: string,
     body: Record<string, unknown>,
-    headers:Record<string, unknown> = {}
+    headers:Record<string, unknown> = {},
     ): Promise<any>{
     try {
         const response: Response = await fetch(url, {
@@ -9,12 +11,13 @@ export default async function Post(
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
+                "Authorization": "Basic " + base64.encode("superuser:superpassword"),
                 ...headers
             },
             body: JSON.stringify(body)
         });
         return response.json();
     } catch (e) {
-        throw new Error(e);
+        throw new Error(e as string);
     }
 }

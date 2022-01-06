@@ -1,122 +1,200 @@
 import * as React from 'react';
 import '../Less/app.less';
 import {apiRoute} from '../utils';
-import {AppProps, AppStates} from "../../server/domain/IApp";
-import {ITest} from "../../server/domain/ITest";
-import {Put, Post, Get, Delete} from "../Services";
+import {AppProps, AppStates, MediaProps, MediaState } from "../../server/domain/IApp";
+import {Post, Get} from "../Services";
+import _ from "underscore";
+import { IScrapeData } from '../../server/domain/IScrapeData';
+
+const numItemsPerPage = 3;
 
 export default class App extends React.Component<AppProps, AppStates> {
     state: AppStates = {
-        username: '',
-        textOfPostTest: '',
-        textForPost: '',
-        textOfPutTest: '',
-        textForPut: '',
-        textOfDeleteTest: '',
-        textForDelete: '',
+        urlsText: "",
+        scrapingResult: undefined,
+        isLoading: false,
+        isScraping: false,
+
+        pageIndex: 0,
+        searchText: "",
+        types: ["image", "video"],
+        results: [],
+        count: 0,
     };
 
-    testGet = async (): Promise<void> => {
+    componentDidMount = () => {
+        this.get();
+    }
+
+    scrape = async (): Promise<void> => {
+        const { urlsText } = this.state;
+        if (!urlsText?.trim())
+            return;
+
+        this.setState({ isScraping: true });
+        const urls = urlsText.split(";");
+
         try {
-            const res: { username: string } = await Get(apiRoute.getRoute('test'))
-            this.setState({username: res.username});
+            const data: any = await Post(apiRoute.getRoute("scrape"), { urls });
+            this.setState({ scrapingResult: data });
         } catch (e) {
-            this.setState({username: e.message});
+            this.setState({ errorMessage: e.message });
+        } finally {
+            this.setState({ isScraping: false });
         }
     }
 
+    get = async (): Promise<any[]> => {
+        try {
+            this.setState({ isLoading: true });
+            let route = `${apiRoute.getRoute("scrape")}?`;
+            route += new URLSearchParams({
+                searchText: this.state.searchText.toString(),
+                pageIndex: this.state.pageIndex.toString(),
+            }).toString();
 
-    testPost = async (): Promise<void> => {
-        const {textOfPostTest} = this.state;
+            const data: { results: IScrapeData[], count: number } = await Get(route);
+            this.setState({ results: data.results, count: data.count });
 
-        if (textOfPostTest.trim()) {
-            try {
-                const res: ITest = await Post(
-                    apiRoute.getRoute('test'),
-                    {text: textOfPostTest}
-                );
-                this.setState({
-                    textForPost: res.text,
-                    response: res,
-                });
-            } catch (e) {
-                this.setState({textForPost: e.message});
-            }
+        } catch (e) {
+            this.setState({ errorMessage: e.message });
+        } finally {
+            this.setState({ isLoading: false });
         }
+
+        return [];
     }
 
-    testPut = async (): Promise<void> => {
-        const {textOfPutTest, response} = this.state;
-        if (response && textOfPutTest.trim()) {
-            try {
-                const res: ITest = await Put(
-                    apiRoute.getRoute('test'),
-                    {text: textOfPutTest, id: response?._id}
-                    );
-                this.setState({textForPut: res.text, response: res});
-            } catch (e) {
-                this.setState({textForPut: e.message});
-            }
-        } else {
-            this.setState({
-                textForPut: "You don't have any resource in database to change. first use post",
-            })
-        }
+    next = async (): Promise<void> => {
+        let numOfPages = Math.ceil(this.state.count / numItemsPerPage);
+        if (this.state.pageIndex + 1 >= numOfPages)
+            return;
+
+        let index = this.state.pageIndex + 1;
+        this.setState({ pageIndex: index }, this.get);
     }
 
-    testDelete = async (): Promise<void> => {
-        const {response} = this.state;
-        if (response) {
-            try {
-                const res: ITest = await Delete(apiRoute.getRoute('test'), {id: response?._id});
-                this.setState({textForDelete: `${res._id} ${res.text}`, response: undefined});
-            } catch (e) {
-                this.setState({textForDelete: e.message});
-            }
-        } else {
-            this.setState({
-                textForDelete: "You don't have any resource in database to delete. first use post"
-            })
-        }
+    previous = async (): Promise<void> => {
+        if (this.state.pageIndex > 0)
+            this.setState({ pageIndex: this.state.pageIndex - 1 }, this.get);
+    }
+
+    toggleTypes = (type: string) => {
+        let index = this.state.types.indexOf(type);
+        if (index >= 0)
+            this.state.types.splice(index, 1);
+        else
+            this.state.types.push(type);
+
+        this.setState({ types: this.state.types });
     }
 
     render() {
-        const {username, textForPost, textForPut, textForDelete} = this.state;
-        const inputText = "Input text...";
+        const { isLoading, isScraping, scrapingResult, errorMessage } = this.state;
+        const urlInputPlaceholder = "Enter some urls to scrape (separated by semicolon)";
+        const searchInputPlaceholder = "Filter by text";
+
+        let self = this;
+        const updateText = _.debounce(function(text: string): void {
+            self.setState({ searchText: text });
+        }, 300);
+
         return (
             <div>
-                <div>
+                <div className="scrape-section">
+                    <h1> Scraping </h1> 
+                    <input className="url-input" type="text" onChange={e => this.setState({urlsText: e.target.value})} placeholder={urlInputPlaceholder}/>
+                    <button onClick={this.scrape}>{"Happy scraping!"}</button>
+
                     <div>
-                        <div>
-                            <button onClick={this.testGet}>{"Test Get"}</button>
+                    {
+                        isScraping 
+                        ? <><label>{"Scraping...Please wait! "}</label></>
+                        : scrapingResult && <><pre className="results-code">{JSON.stringify(scrapingResult, null, 4)}</pre></>
+                    }
+                    </div>
+
+                    {
+                        errorMessage && <div className="error-message">{errorMessage}</div>
+                    }
+                </div>
+
+                <div className="results-section">
+                    <h1> Viewing</h1>
+                    <input className="url-input" type="text" onChange={e => updateText(e.target.value)} placeholder={searchInputPlaceholder}/>
+                    <button onClick={e => this.setState({ pageIndex: 0 }, this.get)}>{"Filter"}</button>
+
+                    <div className="toolbar">
+                        <h6>Displaying page {this.state.pageIndex + 1} of { Math.ceil(this.state.count / numItemsPerPage)} pages</h6>
+                        <div className="checkboxes">
+                            <div className="checkbox">
+                                <input type="checkbox" value="video" checked={this.state.types.indexOf("video") >= 0 } onChange={e => this.toggleTypes("video")}/> Video
+                            </div>
+                            <div className="checkbox">
+                                <input type="checkbox" value="image" checked={this.state.types.indexOf("image") >= 0 } onChange={e => this.toggleTypes("image")}/> Image
+                            </div>
                         </div>
-                        <label>{"Test for Get: "}</label>
-                        <h2>{!!username && `Hello ${username}!`}</h2>
+
+                        <div className="navigation">
+                            <button onClick={this.previous}>{"Previous"}</button>
+                            <button onClick={this.next}>{"Next"}</button>
+                        </div>
                     </div>
+
                     <div>
-                        <input onChange={e => this.setState({textOfPostTest: e.target.value})} placeholder={inputText}/>
-                        <button onClick={this.testPost}>{"Test Post"}</button>
-                    </div>
-                    <div>
-                        <label>{"Test for Post: "}</label>
-                        <h3>{textForPost}</h3>
-                    </div>
-                    <div>
-                        <input onChange={e => this.setState({textOfPutTest: e.target.value})} placeholder={inputText}/>
-                        <button onClick={this.testPut}>{"Test Put"}</button>
-                    </div>
-                    <div>
-                        <label>{"Test for Put: "}</label>
-                        <h3>{textForPut}</h3>
-                    </div>
-                    <div>
-                        <button onClick={this.testDelete}>{"Test Delete"}</button>
-                    </div>
-                    <div>
-                        <label>{"Test for Delete: "}</label>
-                        <h3>{textForDelete}</h3>
+                        {
+                            isLoading ?
+                            <h3>Loading...</h3>
+                            : <div>
+                                {
+                                    this.state.results.map(function(result: IScrapeData): any {
+                                        let medias = [];
+                                        if (self.state.types.indexOf("image") >= 0) {
+                                            result.images.forEach(function(imageSrc: string): void {
+                                                medias.push(<Media key={imageSrc} type="image" src={imageSrc}></Media>);
+                                            });
+                                        }
+        
+                                        if (self.state.types.indexOf("video") >= 0) {
+                                            result.videos.forEach(function(videoSrc: string): void {
+                                                medias.push(<Media key={videoSrc} type="video" src={videoSrc}></Media>);
+                                            });
+                                        }
+     
+                                        return (
+                                            <div>
+                                                <h4>{result.url}</h4>
+                                                <div className="media-section">
+                                                    {
+                                                        medias.length > 0 
+                                                        ?
+                                                        medias
+                                                        : <h5>No media to view!</h5>
+                                                    }
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                }
+                            </div>
+                        }
                     </div>
                 </div>
+            </div>
+        );
+    }
+}
+
+class Media extends React.Component<MediaProps, MediaState> {
+    render() {
+        return (
+            <div className="media">
+                { this.props.type == "image" 
+                    ? <img key={this.props.src} src={this.props.src} className="img"/>
+                    : <video key={this.props.src} className="video" controls>
+                        <source src={this.props.src} type="video/mp4"></source>
+                    </video>
+                }
             </div>
         );
     }

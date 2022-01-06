@@ -1,14 +1,25 @@
-import {ITest} from "./ITest";
+import { IScrapeData } from "../../server/domain/IScrapeData";
 
 export interface AppStates {
-    username?: string;
-    textOfPostTest: string,
-    textForPost: string,
-    textOfPutTest: string,
-    textForPut: string,
-    textOfDeleteTest: string,
-    textForDelete: string,
-    response?: ITest,
+    isScraping?: boolean;
+    isLoading?: boolean;
+    urlsText?: string;
+    scrapingResult?: IScrapeData[];
+    errorMessage?: string;
+
+    searchText?: string;
+    types?: string[];
+    pageIndex?: number;
+    results: IScrapeData[];
+    count: number;
 }
 
 export interface AppProps {}
+
+export interface MediaProps {
+    src: string;
+    type: "image" | "video";
+    key: string;
+}
+
+export interface MediaState {}

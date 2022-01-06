@@ -1,37 +1,111 @@
 @green: green;
-@link-color:        #b94eb4; // sea blue
+@link-color:        lighten(blue, 22%);
 @link-color-hover:  lighten(@link-color, 30%);
 @button-after:  darken(@link-color, 10%);
-@button-padding: 5px;
-@button-radius: 15px;
+@button-padding: 8px;
+@button-radius: 4px;
+
 h1 {
-  color: @green;
+    color: @green;
 }
 
 body {
-  text-align: center;
-  margin: auto;
+    text-align: center;
+    margin: auto;
+    font-size: 16px;
+    padding: 60px 0 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: auto;
 }
+
 button {
-  color: antiquewhite;
-  padding: @button-padding;
-  background-color: @link-color;
-  border-radius: @button-radius;
-  margin: 5px;
-  font-weight: 600;
+    color: white;
+    padding: 4px 12px;
+    background-color: @link-color;
+    border-radius: @button-radius;
+    cursor: pointer;
+    box-shadow: none;
+    border: 1px solid wheat;
+    height: 40px;
+}
+
+input:not([type="checkbox"]) {
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 4px;
+    border: 1px solid gray;
+    min-width: 320px;
+    margin: 0 16px 0 0;
 }
 
 select {
-  width: 200px;
+    width: 200px;
 }
 
-button:hover{
-background-color: @button-after;
+button:hover {
+    background-color: @button-after;
 }
 
 a, .link {
-  color: @link-color;
+    color: @link-color;
 }
+
 a:hover {
-  color: @link-color-hover;
+    color: @link-color-hover;
+}
+
+.results-code {
+    text-align: left;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    margin: 24px auto;
+    width: 50vw;
+    padding: 18px 32px;
+    border-radius: 14px;
+    border: 1px solid gray;
+}
+
+.media-section {
+    display: flex;
+    flex: 1 1 auto;
+    margin: 48px 24px;
+    flex-wrap: wrap;
+
+    .media {
+        display: flex;
+        flex: auto;
+        margin: 16px;
+        height: 180px;
+        width: auto;
+        border: 1px solid lighten(gray, 5%);
+        border-radius: 4px;
+        justify-content: center;
+        align-items: center;
+        padding: 14px 10px;
+
+        img, video {
+            width: auto;
+            height: 100%;
+        }
+    }
+}
+
+.checkboxes {
+    display: flex;
+    flex-direction: column;
+
+    .checkbox {
+        display: flex;
+        flex: 0 0 auto;
+        flex-wrap: nowrap;
+        width: 80px;
+    }
+}
+
+.toolbar {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
