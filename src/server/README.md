@@ -1,18 +1,14 @@
-# Server side boilerplate with MongoDB as database, Express framework with Typescript
 
-## Introduction
+# Simple app to demonstrate how to scrape images and videos from an url with cherio (nodejs)
 
-In the Server side of boilerplate, MongoDB and Express framework with Typescript has been utilized to reach a well structured and fully separated concerns source code.
-the source code has been separated into multiple layers and every layer fully explaind with lots of details in their own README files.
+## How to run? 
+
+- Checkout this repository
+- Run `yarn dev` command
+
+## Disclaimer 
+
+This is built in only a few hours to demonstrate the ability to write an simple app with NodeJS & React for skill testing purpose. No warranty to fully serve as an real application.
 
 
-### Nodemon
-
-Nodemon is a utility monitors for any changes in the server-side source code, and automatically restarts the server. Nodemon is just for development purposes only.
-**nodemon.json** file is used to hold the configurations for Nodemon.
-
-### Express
-
-Express is a web application framework for Node.js. It is used to build our backend API's.
-
-**src/server/index.ts** is the entry point to the server application which starts a server and listens on port 8085 for connections. The app responds with `{username: <username>}` for requests to the URL (/api/test). It is also configured to serve the static files from **dist** directory.
+### This app structure is forked from https://github.com/fractalliter/express-react-typescript
