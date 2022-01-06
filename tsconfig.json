@@ -2,6 +2,7 @@
   "extends": "@tsconfig/node12/tsconfig.json",
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
+    "noImplicitAny": false,
     "allowSyntheticDefaultImports": true,
     "target": "es2019",
     "jsx": "react",
@@ -9,6 +10,8 @@
     "sourceMap": true,
     "outDir": "./dist/",
     "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noStrictGenericChecks": true,
     "lib": [
       "DOM"
     ]
